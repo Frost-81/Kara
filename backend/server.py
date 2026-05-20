@@ -9,7 +9,21 @@ from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+
+# Emergent LLM imports (optional)
+try:
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+    EMERGENT_AVAILABLE = True
+except ImportError:
+    EMERGENT_AVAILABLE = False
+
+# Firebase imports
+try:
+    import firebase_admin
+    from firebase_admin import credentials, db, storage, auth, firestore
+    FIREBASE_AVAILABLE = True
+except ImportError:
+    FIREBASE_AVAILABLE = False
 
 # SendGrid import (optional)
 try:
@@ -25,7 +39,35 @@ load_dotenv(ROOT_DIR / '.env')
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+db_mongo = client[os.environ['DB_NAME']]
+
+# Firebase initialization
+firebase_credentials_path = os.environ.get('FIREBASE_CREDENTIALS_PATH')
+firebase_project_id = os.environ.get('FIREBASE_PROJECT_ID', 'kara-immobilier-service')
+FIREBASE_DB_URL = os.environ.get('FIREBASE_DB_URL')
+
+if FIREBASE_AVAILABLE and firebase_credentials_path and os.path.exists(firebase_credentials_path):
+    try:
+        if not firebase_admin.get_app():
+            cred = credentials.Certificate(firebase_credentials_path)
+            firebase_admin.initialize_app(cred, {
+                'databaseURL': FIREBASE_DB_URL,
+                'projectId': firebase_project_id
+            })
+        firebase_db = db
+        firebase_firestore = firestore.client()
+        logger_init = logging.getLogger(__name__)
+        logger_init.info(f"Firebase initialized successfully with project: {firebase_project_id}")
+    except Exception as e:
+        FIREBASE_AVAILABLE = False
+        logger_init = logging.getLogger(__name__)
+        logger_init.warning(f"Firebase initialization failed: {str(e)}")
+else:
+    FIREBASE_AVAILABLE = False
+    if not firebase_credentials_path:
+        print("⚠️  FIREBASE_CREDENTIALS_PATH not set in .env")
+    if firebase_project_id == 'kara-immobilier-service':
+        print(f"✓ Firebase Project ID set to: {firebase_project_id}")
 
 # Emergent LLM Key
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
