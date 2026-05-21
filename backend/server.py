@@ -11,7 +11,13 @@ import uuid
 import smtplib
 from datetime import datetime, timezone
 from email.message import EmailMessage
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+
+# Emergent Integrations (optional)
+try:
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+    EMERGENT_AVAILABLE = True
+except ImportError:
+    EMERGENT_AVAILABLE = False
 
 # SendGrid (optional, only used when SENDGRID_API_KEY is configured)
 try:
