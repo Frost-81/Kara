@@ -1,7 +1,7 @@
 from fastapi import FastAPI, APIRouter, HTTPException, BackgroundTasks
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
+from google.cloud import firestore as firestore_module
 import os
 import logging
 from pathlib import Path
@@ -30,10 +30,8 @@ except ImportError:
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+# Firestore connection (uses Application Default Credentials on Cloud Run)
+db = firestore_module.AsyncClient(project=os.environ.get('GOOGLE_CLOUD_PROJECT', 'kara-immobilier-service'))
 
 # Emergent LLM Key
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
@@ -63,7 +61,7 @@ SMTP_USERNAME = os.environ.get("SMTP_USERNAME")
 SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD")
 SMTP_USE_TLS = os.environ.get("SMTP_USE_TLS", "true").lower() == "true"
 
-# ==================== SendGrid Email Helpers ====================
+# ==================== Gmail SMTP Email Helpers ====================
 
 SERVICE_TYPE_LABELS = {
     "rental": "Location",
@@ -71,25 +69,27 @@ SERVICE_TYPE_LABELS = {
     "information": "Information",
 }
 
-def _send_sendgrid_email(to_email: str, subject: str, html_content: str) -> bool:
-    """Send a single email via SendGrid. Returns True on success."""
-    if not (SENDGRID_AVAILABLE and SENDGRID_API_KEY):
-        logger.warning("SendGrid not configured — email not sent")
+def _send_gmail_email(to_email: str, subject: str, html_content: str) -> bool:
+    """Send an HTML email via Gmail SMTP. Returns True on success."""
+    if not all([SMTP_USERNAME, SMTP_PASSWORD]):
+        logger.warning("Gmail SMTP not configured — email not sent")
         return False
     try:
-        message = Mail(
-            from_email=SENDGRID_FROM_EMAIL,
-            to_emails=to_email,
-            subject=subject,
-            html_content=html_content,
-        )
-        sg = SendGridAPIClient(SENDGRID_API_KEY)
-        response = sg.send(message)
-        ok = 200 <= response.status_code < 300
-        logger.info(f"SendGrid send to={to_email} status={response.status_code}")
-        return ok
+        from email.mime.multipart import MIMEMultipart
+        from email.mime.text import MIMEText
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = subject
+        msg['From'] = SMTP_USERNAME
+        msg['To'] = to_email
+        msg.attach(MIMEText(html_content, 'html'))
+        with smtplib.SMTP('smtp.gmail.com', 587, timeout=15) as smtp:
+            smtp.starttls()
+            smtp.login(SMTP_USERNAME, SMTP_PASSWORD)
+            smtp.send_message(msg)
+        logger.info(f"Gmail send to={to_email} subject={subject!r}")
+        return True
     except Exception as e:
-        logger.error(f"SendGrid send failed to={to_email}: {e}")
+        logger.error(f"Gmail send failed to={to_email}: {e}")
         return False
 
 def send_contact_notification(contact: dict) -> None:
@@ -126,7 +126,7 @@ def send_contact_notification(contact: dict) -> None:
       </div>
     </div>
     """
-    _send_sendgrid_email(NOTIFICATION_EMAIL, internal_subject, internal_html)
+    _send_gmail_email(NOTIFICATION_EMAIL, internal_subject, internal_html)
 
     # --- Visitor confirmation ---
     if email:
@@ -156,7 +156,7 @@ def send_contact_notification(contact: dict) -> None:
           </div>
         </div>
         """
-        _send_sendgrid_email(email, confirm_subject, confirm_html)
+        _send_gmail_email(email, confirm_subject, confirm_html)
 
 # ==================== Models ====================
 
@@ -314,15 +314,18 @@ async def create_status_check(input: StatusCheckCreate):
     status_obj = StatusCheck(**status_dict)
     doc = status_obj.model_dump()
     doc['timestamp'] = doc['timestamp'].isoformat()
-    _ = await db.status_checks.insert_one(doc)
+    await db.collection('status_checks').document(status_obj.id).set(doc)
     return status_obj
 
 @api_router.get("/status", response_model=List[StatusCheck])
 async def get_status_checks():
-    status_checks = await db.status_checks.find({}, {"_id": 0}).to_list(1000)
-    for check in status_checks:
-        if isinstance(check['timestamp'], str):
+    docs = db.collection('status_checks').stream()
+    status_checks = []
+    async for doc in docs:
+        check = doc.to_dict()
+        if isinstance(check.get('timestamp'), str):
             check['timestamp'] = datetime.fromisoformat(check['timestamp'])
+        status_checks.append(check)
     return status_checks
 
 # ==================== Contact Form ====================
@@ -344,7 +347,7 @@ async def submit_contact(contact: ContactRequest, background_tasks: BackgroundTa
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         
-        await db.contacts.insert_one(contact_doc)
+        await db.collection('contacts').document(contact_id).set(contact_doc)
         
         # Send notification + confirmation emails in background
         background_tasks.add_task(send_contact_notification, contact_doc)
@@ -363,7 +366,10 @@ async def submit_contact(contact: ContactRequest, background_tasks: BackgroundTa
 @api_router.get("/contacts")
 async def get_contacts():
     """Get all contact submissions (admin endpoint)"""
-    contacts = await db.contacts.find({}, {"_id": 0}).to_list(1000)
+    docs = db.collection('contacts').stream()
+    contacts = []
+    async for doc in docs:
+        contacts.append(doc.to_dict())
     return contacts
 
 @api_router.post("/error-notification", response_model=ErrorNotificationResponse)
@@ -378,7 +384,7 @@ async def error_notification(payload: ErrorNotificationRequest, background_tasks
             "metadata": payload.metadata or {},
             "created_at": datetime.now(timezone.utc).isoformat()
         }
-        await db.error_notifications.insert_one(error_doc)
+        await db.collection('error_notifications').document(error_doc['id']).set(error_doc)
 
         subject = f"[Kara-Immo] Frontend error from {payload.source}"
         body = (
@@ -434,7 +440,7 @@ async def chat_with_bot(chat_message: ChatMessage):
             "bot_response": response,
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
-        await db.chat_history.insert_one(chat_doc)
+        await db.collection('chat_history').add(chat_doc)
         
         return ChatResponse(
             response=response,
@@ -464,7 +470,7 @@ async def book_appointment(appointment: AppointmentRequest):
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         
-        await db.appointments.insert_one(appointment_doc)
+        await db.collection('appointments').document(appointment_id).set(appointment_doc)
         
         logger.info(f"New appointment booked: {appointment.email} for {appointment.preferred_date}")
         
@@ -480,7 +486,10 @@ async def book_appointment(appointment: AppointmentRequest):
 @api_router.get("/appointments")
 async def get_appointments():
     """Get all appointments (admin endpoint)"""
-    appointments = await db.appointments.find({}, {"_id": 0}).to_list(1000)
+    docs = db.collection('appointments').stream()
+    appointments = []
+    async for doc in docs:
+        appointments.append(doc.to_dict())
     return appointments
 
 # Include the router in the main app
@@ -493,7 +502,3 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    client.close()
