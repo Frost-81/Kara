@@ -82,7 +82,9 @@ webpackConfig.devServer = (devServerConfig) => {
 };
 
 // Wrap with visual edits (automatically adds babel plugin, dev server, and overlay in dev mode)
-if (isDevServer) {
+// Disabled to remove the "Made with Emergent" badge
+const ENABLE_VISUAL_EDITS = false;
+if (isDevServer && ENABLE_VISUAL_EDITS) {
   try {
     const { withVisualEdits } = require("@emergentbase/visual-edits/craco");
     webpackConfig = withVisualEdits(webpackConfig);

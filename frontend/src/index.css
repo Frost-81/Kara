@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Hide Emergent platform badge */
+#emergent-badge,
+a[href*="emergent.sh"][id*="badge"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 :root {
   --primary: #0F172A;
   --primary-foreground: #F8FAFC;

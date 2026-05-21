@@ -8,24 +8,12 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional
 import uuid
+import smtplib
 from datetime import datetime, timezone
+from email.message import EmailMessage
+from emergentintegrations.llm.chat import LlmChat, UserMessage
 
-# Emergent LLM imports (optional)
-try:
-    from emergentintegrations.llm.chat import LlmChat, UserMessage
-    EMERGENT_AVAILABLE = True
-except ImportError:
-    EMERGENT_AVAILABLE = False
-
-# Firebase imports
-try:
-    import firebase_admin
-    from firebase_admin import credentials, db, storage, auth, firestore
-    FIREBASE_AVAILABLE = True
-except ImportError:
-    FIREBASE_AVAILABLE = False
-
-# SendGrid import (optional)
+# SendGrid (optional, only used when SENDGRID_API_KEY is configured)
 try:
     from sendgrid import SendGridAPIClient
     from sendgrid.helpers.mail import Mail
@@ -39,35 +27,7 @@ load_dotenv(ROOT_DIR / '.env')
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
-db_mongo = client[os.environ['DB_NAME']]
-
-# Firebase initialization
-firebase_credentials_path = os.environ.get('FIREBASE_CREDENTIALS_PATH')
-firebase_project_id = os.environ.get('FIREBASE_PROJECT_ID', 'kara-immobilier-service')
-FIREBASE_DB_URL = os.environ.get('FIREBASE_DB_URL')
-
-if FIREBASE_AVAILABLE and firebase_credentials_path and os.path.exists(firebase_credentials_path):
-    try:
-        if not firebase_admin.get_app():
-            cred = credentials.Certificate(firebase_credentials_path)
-            firebase_admin.initialize_app(cred, {
-                'databaseURL': FIREBASE_DB_URL,
-                'projectId': firebase_project_id
-            })
-        firebase_db = db
-        firebase_firestore = firestore.client()
-        logger_init = logging.getLogger(__name__)
-        logger_init.info(f"Firebase initialized successfully with project: {firebase_project_id}")
-    except Exception as e:
-        FIREBASE_AVAILABLE = False
-        logger_init = logging.getLogger(__name__)
-        logger_init.warning(f"Firebase initialization failed: {str(e)}")
-else:
-    FIREBASE_AVAILABLE = False
-    if not firebase_credentials_path:
-        print("⚠️  FIREBASE_CREDENTIALS_PATH not set in .env")
-    if firebase_project_id == 'kara-immobilier-service':
-        print(f"✓ Firebase Project ID set to: {firebase_project_id}")
+db = client[os.environ['DB_NAME']]
 
 # Emergent LLM Key
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
@@ -90,61 +50,107 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# ==================== Email Functions ====================
+ERROR_NOTIFICATION_EMAIL = os.environ.get("ERROR_NOTIFICATION_EMAIL", "infokaraimmo@gmail.com")
+SMTP_HOST = os.environ.get("SMTP_HOST")
+SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
+SMTP_USERNAME = os.environ.get("SMTP_USERNAME")
+SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD")
+SMTP_USE_TLS = os.environ.get("SMTP_USE_TLS", "true").lower() == "true"
 
-def send_notification_email(subject: str, html_content: str):
-    """Send notification email via SendGrid"""
-    if not SENDGRID_AVAILABLE or not SENDGRID_API_KEY:
-        logger.warning("SendGrid not configured - email not sent")
+# ==================== SendGrid Email Helpers ====================
+
+SERVICE_TYPE_LABELS = {
+    "rental": "Location",
+    "management": "Gestion locative",
+    "information": "Information",
+}
+
+def _send_sendgrid_email(to_email: str, subject: str, html_content: str) -> bool:
+    """Send a single email via SendGrid. Returns True on success."""
+    if not (SENDGRID_AVAILABLE and SENDGRID_API_KEY):
+        logger.warning("SendGrid not configured — email not sent")
         return False
-    
     try:
         message = Mail(
             from_email=SENDGRID_FROM_EMAIL,
-            to_emails=NOTIFICATION_EMAIL,
+            to_emails=to_email,
             subject=subject,
-            html_content=html_content
+            html_content=html_content,
         )
         sg = SendGridAPIClient(SENDGRID_API_KEY)
         response = sg.send(message)
-        logger.info(f"Email sent successfully: {response.status_code}")
-        return response.status_code == 202
+        ok = 200 <= response.status_code < 300
+        logger.info(f"SendGrid send to={to_email} status={response.status_code}")
+        return ok
     except Exception as e:
-        logger.error(f"Failed to send email: {str(e)}")
+        logger.error(f"SendGrid send failed to={to_email}: {e}")
         return False
 
-def send_contact_notification(contact_data: dict):
-    """Send notification for new contact form submission"""
-    subject = f"Nouveau message de {contact_data['name']} - Kara Immobilier Service"
-    html_content = f"""
-    <h2>Nouveau message reçu</h2>
-    <p><strong>Nom:</strong> {contact_data['name']}</p>
-    <p><strong>Email:</strong> {contact_data['email']}</p>
-    <p><strong>Téléphone:</strong> {contact_data.get('phone', 'Non fourni')}</p>
-    <p><strong>Type de bien:</strong> {contact_data.get('property_type', 'Non spécifié')}</p>
-    <p><strong>Message:</strong></p>
-    <p>{contact_data['message']}</p>
-    <hr>
-    <p><em>Message envoyé depuis le site Kara Immobilier Service</em></p>
-    """
-    return send_notification_email(subject, html_content)
+def send_contact_notification(contact: dict) -> None:
+    """Notify the agency of a new contact submission, and confirm to the visitor."""
+    name = contact.get("name", "")
+    email = contact.get("email", "")
+    phone = contact.get("phone") or "Non fourni"
+    service_type_raw = contact.get("service_type") or ""
+    service_type = SERVICE_TYPE_LABELS.get(service_type_raw, service_type_raw or "Non précisé")
+    property_type = contact.get("property_type") or "Non précisé"
+    message_body = contact.get("message", "")
 
-def send_appointment_notification(appointment_data: dict):
-    """Send notification for new appointment booking"""
-    subject = f"Nouvelle demande de RDV de {appointment_data['name']} - Kara Immobilier Service"
-    html_content = f"""
-    <h2>Nouvelle demande de rendez-vous</h2>
-    <p><strong>Nom:</strong> {appointment_data['name']}</p>
-    <p><strong>Email:</strong> {appointment_data['email']}</p>
-    <p><strong>Téléphone:</strong> {appointment_data['phone']}</p>
-    <p><strong>Date souhaitée:</strong> {appointment_data['preferred_date']}</p>
-    <p><strong>Heure souhaitée:</strong> {appointment_data['preferred_time']}</p>
-    <p><strong>Adresse du bien:</strong> {appointment_data.get('property_address', 'Non spécifiée')}</p>
-    <p><strong>Notes:</strong> {appointment_data.get('notes', 'Aucune')}</p>
-    <hr>
-    <p><em>Demande envoyée depuis le site Kara Immobilier Service</em></p>
+    # --- Internal notification ---
+    internal_subject = f"Nouveau message — {name} | {service_type}"
+    internal_html = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #0f172a;">
+      <div style="background:#0f172a; padding:24px; color:#fff;">
+        <h2 style="margin:0; font-size:20px;">Kara Immobilier Service</h2>
+        <p style="margin:6px 0 0; color:#5eead4; font-size:13px; letter-spacing:1px;">NOUVEAU MESSAGE DE CONTACT</p>
+      </div>
+      <div style="padding:24px; background:#f8fafc;">
+        <table style="width:100%; border-collapse:collapse; font-size:14px;">
+          <tr><td style="padding:8px 0; color:#475569; width:140px;">Nom</td><td style="padding:8px 0; font-weight:600;">{name}</td></tr>
+          <tr><td style="padding:8px 0; color:#475569;">Email</td><td style="padding:8px 0;"><a href="mailto:{email}" style="color:#0d9488;">{email}</a></td></tr>
+          <tr><td style="padding:8px 0; color:#475569;">Téléphone</td><td style="padding:8px 0;">{phone}</td></tr>
+          <tr><td style="padding:8px 0; color:#475569;">Type de service</td><td style="padding:8px 0; font-weight:600; color:#0d9488;">{service_type}</td></tr>
+          <tr><td style="padding:8px 0; color:#475569;">Type de bien</td><td style="padding:8px 0;">{property_type}</td></tr>
+        </table>
+        <div style="margin-top:18px; background:#fff; padding:16px; border-left:3px solid #14b8a6; border-radius:2px;">
+          <p style="margin:0 0 6px; color:#475569; font-size:13px; text-transform:uppercase; letter-spacing:1px;">Message</p>
+          <p style="margin:0; line-height:1.6;">{message_body}</p>
+        </div>
+        <p style="margin-top:24px; color:#94a3b8; font-size:12px;">Envoyé depuis le site karaimmobilier.com</p>
+      </div>
+    </div>
     """
-    return send_notification_email(subject, html_content)
+    _send_sendgrid_email(NOTIFICATION_EMAIL, internal_subject, internal_html)
+
+    # --- Visitor confirmation ---
+    if email:
+        confirm_subject = "Nous avons bien reçu votre message — Kara Immobilier Service"
+        confirm_html = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #0f172a;">
+          <div style="background:#0f172a; padding:24px; color:#fff; text-align:center;">
+            <h2 style="margin:0;">Kara Immobilier Service</h2>
+            <p style="margin:6px 0 0; color:#5eead4; font-size:13px; letter-spacing:1px;">PLUS DE REVENUS. MOINS DE STRESS.</p>
+          </div>
+          <div style="padding:28px; background:#f8fafc;">
+            <p>Bonjour <strong>{name}</strong>,</p>
+            <p>Merci d'avoir pris contact avec <strong>Kara Immobilier Service</strong>. Nous avons bien reçu votre message et un de nos experts vous recontactera <strong>en moins de 24 heures</strong>.</p>
+            <div style="background:#fff; padding:16px; border-left:3px solid #14b8a6; border-radius:2px; margin:18px 0;">
+              <p style="margin:0 0 6px; color:#475569; font-size:13px; text-transform:uppercase; letter-spacing:1px;">Récapitulatif de votre demande</p>
+              <p style="margin:6px 0;"><strong>Service :</strong> {service_type}</p>
+              <p style="margin:6px 0; line-height:1.6;">{message_body}</p>
+            </div>
+            <p>En attendant, n'hésitez pas à nous contacter directement :</p>
+            <p style="margin:6px 0;">📞 <strong>438-439-9590</strong><br/>
+            ✉️ <a href="mailto:infokaraimmo@gmail.com" style="color:#0d9488;">infokaraimmo@gmail.com</a><br/>
+            📍 9008 2e Avenue, Montréal</p>
+            <p style="color:#475569; font-size:13px; margin-top:24px;">À très bientôt,<br/><strong>L'équipe Kara Immobilier Service</strong></p>
+          </div>
+          <div style="padding:16px; text-align:center; color:#94a3b8; font-size:11px; background:#0f172a;">
+            © Kara Immobilier Service — Montréal | Laval | Longueuil | Brossard | Trois-Rivières
+          </div>
+        </div>
+        """
+        _send_sendgrid_email(email, confirm_subject, confirm_html)
 
 # ==================== Models ====================
 
@@ -162,6 +168,7 @@ class ContactRequest(BaseModel):
     email: EmailStr
     phone: Optional[str] = None
     message: str
+    service_type: Optional[str] = None
     property_type: Optional[str] = None
 
 class ContactResponse(BaseModel):
@@ -191,6 +198,15 @@ class AppointmentResponse(BaseModel):
     id: str
     status: str
     message: str
+
+class ErrorNotificationRequest(BaseModel):
+    source: str
+    message: str
+    stack: Optional[str] = None
+    metadata: Optional[dict] = None
+
+class ErrorNotificationResponse(BaseModel):
+    status: str
 
 # ==================== Chat Sessions Storage ====================
 chat_sessions = {}
@@ -262,6 +278,24 @@ If asked to book an appointment, ask for:
 - Property address (optional)
 """
 
+def send_error_notification_email(subject: str, body: str):
+    """Best-effort email notification via SMTP when configured."""
+    if not all([SMTP_HOST, SMTP_USERNAME, SMTP_PASSWORD]):
+        logger.warning("SMTP not configured; skipping email notification")
+        return
+
+    email = EmailMessage()
+    email["Subject"] = subject
+    email["From"] = SMTP_USERNAME
+    email["To"] = ERROR_NOTIFICATION_EMAIL
+    email.set_content(body)
+
+    with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=10) as smtp:
+        if SMTP_USE_TLS:
+            smtp.starttls()
+        smtp.login(SMTP_USERNAME, SMTP_PASSWORD)
+        smtp.send_message(email)
+
 # ==================== Routes ====================
 
 @api_router.get("/")
@@ -298,6 +332,7 @@ async def submit_contact(contact: ContactRequest, background_tasks: BackgroundTa
             "email": contact.email,
             "phone": contact.phone,
             "message": contact.message,
+            "service_type": contact.service_type,
             "property_type": contact.property_type,
             "status": "pending",
             "created_at": datetime.now(timezone.utc).isoformat()
@@ -305,7 +340,7 @@ async def submit_contact(contact: ContactRequest, background_tasks: BackgroundTa
         
         await db.contacts.insert_one(contact_doc)
         
-        # Send email notification in background
+        # Send notification + confirmation emails in background
         background_tasks.add_task(send_contact_notification, contact_doc)
         
         logger.info(f"New contact form submitted: {contact.email}")
@@ -324,6 +359,35 @@ async def get_contacts():
     """Get all contact submissions (admin endpoint)"""
     contacts = await db.contacts.find({}, {"_id": 0}).to_list(1000)
     return contacts
+
+@api_router.post("/error-notification", response_model=ErrorNotificationResponse)
+async def error_notification(payload: ErrorNotificationRequest, background_tasks: BackgroundTasks):
+    """Centralized frontend error reporting endpoint with optional email notification."""
+    try:
+        error_doc = {
+            "id": str(uuid.uuid4()),
+            "source": payload.source,
+            "message": payload.message,
+            "stack": payload.stack,
+            "metadata": payload.metadata or {},
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.error_notifications.insert_one(error_doc)
+
+        subject = f"[Kara-Immo] Frontend error from {payload.source}"
+        body = (
+            f"Source: {payload.source}\n"
+            f"Message: {payload.message}\n"
+            f"Timestamp: {error_doc['created_at']}\n\n"
+            f"Metadata: {payload.metadata}\n\n"
+            f"Stack:\n{payload.stack or 'N/A'}"
+        )
+        background_tasks.add_task(send_error_notification_email, subject, body)
+
+        return ErrorNotificationResponse(status="received")
+    except Exception as e:
+        logger.error(f"Failed to store error notification: {str(e)}")
+        raise HTTPException(status_code=500, detail="Impossible d'enregistrer la notification d'erreur")
 
 # ==================== AI Chatbot ====================
 
@@ -377,7 +441,7 @@ async def chat_with_bot(chat_message: ChatMessage):
 # ==================== Appointments ====================
 
 @api_router.post("/appointment", response_model=AppointmentResponse)
-async def book_appointment(appointment: AppointmentRequest, background_tasks: BackgroundTasks):
+async def book_appointment(appointment: AppointmentRequest):
     """Book an appointment"""
     try:
         appointment_id = str(uuid.uuid4())
@@ -395,9 +459,6 @@ async def book_appointment(appointment: AppointmentRequest, background_tasks: Ba
         }
         
         await db.appointments.insert_one(appointment_doc)
-        
-        # Send email notification in background
-        background_tasks.add_task(send_appointment_notification, appointment_doc)
         
         logger.info(f"New appointment booked: {appointment.email} for {appointment.preferred_date}")
         
