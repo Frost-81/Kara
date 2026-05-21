@@ -12,20 +12,13 @@ import smtplib
 from datetime import datetime, timezone
 from email.message import EmailMessage
 
-# Emergent Integrations (optional)
+# Google Generative AI (Gemini)
 try:
-    from emergentintegrations.llm.chat import LlmChat, UserMessage
-    EMERGENT_AVAILABLE = True
+    from google import genai
+    from google.genai import types as genai_types
+    GEMINI_AVAILABLE = True
 except ImportError:
-    EMERGENT_AVAILABLE = False
-
-# SendGrid (optional, only used when SENDGRID_API_KEY is configured)
-try:
-    from sendgrid import SendGridAPIClient
-    from sendgrid.helpers.mail import Mail
-    SENDGRID_AVAILABLE = True
-except ImportError:
-    SENDGRID_AVAILABLE = False
+    GEMINI_AVAILABLE = False
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -33,12 +26,30 @@ load_dotenv(ROOT_DIR / '.env')
 # Firestore connection (uses Application Default Credentials on Cloud Run)
 db = firestore_module.AsyncClient(project=os.environ.get('GOOGLE_CLOUD_PROJECT', 'kara-immobilier-service'))
 
-# Emergent LLM Key
-EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
+# Google Generative AI configuration
+GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
+GOOGLE_CLOUD_PROJECT = os.environ.get("GOOGLE_CLOUD_PROJECT", "kara-immobilier-service")
+GOOGLE_CLOUD_LOCATION = os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1")
+GEMINI_USE_VERTEX_AI = os.environ.get("GEMINI_USE_VERTEX_AI", "true").lower() == "true"
 
-# SendGrid configuration
-SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
-SENDGRID_FROM_EMAIL = os.environ.get('SENDGRID_FROM_EMAIL', 'infokaraimmo@gmail.com')
+
+def create_genai_client():
+    if not GEMINI_AVAILABLE:
+        return None
+    if GEMINI_USE_VERTEX_AI and GOOGLE_CLOUD_PROJECT:
+        return genai.Client(
+            vertexai=True,
+            project=GOOGLE_CLOUD_PROJECT,
+            location=GOOGLE_CLOUD_LOCATION,
+        )
+    if GOOGLE_API_KEY:
+        return genai.Client(api_key=GOOGLE_API_KEY)
+    return None
+
+
+GENAI_CLIENT = create_genai_client()
+
+# Email configuration
 NOTIFICATION_EMAIL = os.environ.get('NOTIFICATION_EMAIL', 'infokaraimmo@gmail.com')
 
 # Create the main app without a prefix
@@ -216,6 +227,24 @@ class ErrorNotificationResponse(BaseModel):
 
 # ==================== Chat Sessions Storage ====================
 chat_sessions = {}
+GEMINI_MODEL_NAME = os.environ.get("GEMINI_MODEL_NAME", "gemini-2.5-flash")
+
+
+def get_gemini_chat(session_key: str, language: str = "fr"):
+    """Get or create a Gemini chat session for the specified language."""
+    if not GENAI_CLIENT:
+        return None
+
+    if session_key not in chat_sessions:
+        system_message = SYSTEM_MESSAGE_EN if language == "en" else SYSTEM_MESSAGE_FR
+        chat_sessions[session_key] = GENAI_CLIENT.chats.create(
+            model=GEMINI_MODEL_NAME,
+            config=genai_types.GenerateContentConfig(
+                system_instruction=system_message,
+                temperature=0.7,
+            ),
+        )
+    return chat_sessions[session_key]
 
 # ==================== System Message for Chatbot ====================
 SYSTEM_MESSAGE_FR = """Tu es l'assistant virtuel de Kara Immobilier Service, une entreprise spécialisée dans la gestion et location immobilière au Québec (Montréal, Laval, Longueuil, Brossard, Trois-Rivières).
@@ -405,45 +434,38 @@ async def error_notification(payload: ErrorNotificationRequest, background_tasks
 
 @api_router.post("/chat", response_model=ChatResponse)
 async def chat_with_bot(chat_message: ChatMessage):
-    """Chat with the AI assistant"""
+    """Chat with the AI assistant using Google Generative AI (Gemini)"""
     try:
+        if not GENAI_CLIENT:
+            raise HTTPException(status_code=503, detail="AI assistant is not configured")
+        
         session_id = chat_message.session_id or str(uuid.uuid4())
         language = chat_message.language or "fr"
         
-        # Select system message based on language
-        system_message = SYSTEM_MESSAGE_EN if language == "en" else SYSTEM_MESSAGE_FR
-        
-        # Create a new session key that includes language to handle language switches
+        # Get or create session key for chat history management
         session_key = f"{session_id}_{language}"
+        chat = get_gemini_chat(session_key, language)
+        if chat is None:
+            raise HTTPException(status_code=503, detail="AI assistant is not configured")
         
-        # Get or create chat instance for this session
-        if session_key not in chat_sessions:
-            chat_sessions[session_key] = LlmChat(
-                api_key=EMERGENT_LLM_KEY,
-                session_id=session_key,
-                system_message=system_message
-            ).with_model("openai", "gpt-5.2")
+        # Send message and get response
+        response = chat.send_message(chat_message.message)
+        bot_response = response.text
         
-        chat = chat_sessions[session_key]
-        
-        # Create user message
-        user_message = UserMessage(text=chat_message.message)
-        
-        # Get response
-        response = await chat.send_message(user_message)
-        
-        # Store chat history in database
+        # Store chat history in Firestore
         chat_doc = {
             "session_id": session_id,
             "language": language,
             "user_message": chat_message.message,
-            "bot_response": response,
+            "bot_response": bot_response,
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
         await db.collection('chat_history').add(chat_doc)
         
+        logger.info(f"Chat message processed for session {session_id}")
+        
         return ChatResponse(
-            response=response,
+            response=bot_response,
             session_id=session_id
         )
     except Exception as e:
