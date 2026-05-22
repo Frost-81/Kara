@@ -10,7 +10,12 @@
       {
         "source": "**",
         "destination": "/index.html"
-      }
-    ]
+      }    ],
+    "redirects": [
+      {
+        "source": "https://kara-immobilier-service.web.app",
+        "destination": "https://karaimmobilierservice.com",
+        "type": 301
+      }    ]
   }
 }

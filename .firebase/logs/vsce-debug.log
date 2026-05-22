@@ -9488,3 +9488,62 @@ E0522 13:01:55.112949   89788 watch.go:40] Failed to load config from "c:\\Codin
  {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0522 13:03:15.112207   89788 watch.go:40] Failed to load config from \"c:\\\\Coding\\\\MyGithub\\\\Kara\\\\dataconnect\": could not find dataconnect.yaml in `c:\\Coding\\MyGithub\\Kara\\dataconnect`\n"}}
 [debug] [2026-05-22T17:03:25.112Z] E0522 13:03:25.113126   89788 watch.go:40] Failed to load config from "c:\\Coding\\MyGithub\\Kara\\dataconnect": could not find dataconnect.yaml in `c:\Coding\MyGithub\Kara\dataconnect`
  {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0522 13:03:25.113126   89788 watch.go:40] Failed to load config from \"c:\\\\Coding\\\\MyGithub\\\\Kara\\\\dataconnect\": could not find dataconnect.yaml in `c:\\Coding\\MyGithub\\Kara\\dataconnect`\n"}}
+[debug] [2026-05-22T17:03:35.111Z] E0522 13:03:35.112189   89788 watch.go:40] Failed to load config from "c:\\Coding\\MyGithub\\Kara\\dataconnect": could not find dataconnect.yaml in `c:\Coding\MyGithub\Kara\dataconnect`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0522 13:03:35.112189   89788 watch.go:40] Failed to load config from \"c:\\\\Coding\\\\MyGithub\\\\Kara\\\\dataconnect\": could not find dataconnect.yaml in `c:\\Coding\\MyGithub\\Kara\\dataconnect`\n"}}
+[debug] [2026-05-22T17:03:43.814Z] [Firebase Plugin] Received emulators shutdown notification.
+[debug] [2026-05-22T17:03:45.111Z] E0522 13:03:45.112023   89788 watch.go:40] Failed to load config from "c:\\Coding\\MyGithub\\Kara\\dataconnect": could not find dataconnect.yaml in `c:\Coding\MyGithub\Kara\dataconnect`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0522 13:03:45.112023   89788 watch.go:40] Failed to load config from \"c:\\\\Coding\\\\MyGithub\\\\Kara\\\\dataconnect\": could not find dataconnect.yaml in `c:\\Coding\\MyGithub\\Kara\\dataconnect`\n"}}
+[info] [Firebase Plugin] Stopping SQL Connect toolkit
+[warn] !  SQL Connect Emulator has exited upon receiving signal: SIGINT 
+[debug] [2026-05-22T17:34:58.843Z] [Firebase Plugin] Activating Firebase extension.
+[info] [Firebase Plugin] Checked firebase-tools, is up to date!
+[debug] [2026-05-22T17:35:02.099Z] [Firebase Plugin] requireAuthWrapper
+[debug] [2026-05-22T17:35:02.106Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-05-22T17:35:02.106Z] > authorizing via signed-in user (mtlprogramming@gmail.com)
+[debug] [2026-05-22T17:35:02.108Z] Checked if tokens are valid: false, expires at: 1779461274710
+[debug] [2026-05-22T17:35:02.108Z] Checked if tokens are valid: false, expires at: 1779461274710
+[debug] [2026-05-22T17:35:02.108Z] > refreshing access token with scopes: []
+[debug] [2026-05-22T17:35:02.109Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-05-22T17:35:02.109Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-05-22T17:35:02.114Z] [Firebase Plugin] VSCode notification server listening on port 40001
+[info] [Firebase Plugin] Starting SQL Connect toolkit (version 3.4.8) on port 50001
+[debug] [2026-05-22T17:35:02.489Z] 'fdc build' failed with error: Unable to build your SQL Connect schema and connectors (exit code 1): E0522 13:35:02.485337  116084 cmd.go:43] Error loading data connect config: could not find dataconnect.yaml in `c:\Coding\MyGithub\Kara\dataconnect`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"'fdc build' failed with error: Unable to build your SQL Connect schema and connectors (exit code 1): E0522 13:35:02.485337  116084 cmd.go:43] Error loading data connect config: could not find dataconnect.yaml in `c:\\Coding\\MyGithub\\Kara\\dataconnect`\n"}}
+[debug] [2026-05-22T17:35:02.490Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"dataconnect"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2026-05-22T17:35:02.490Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"dataconnect"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2026-05-22T17:35:02.490Z] Starting SQL Connect Emulator with command {"binary":"C:\\Users\\cosma\\.cache\\firebase\\emulators\\dataconnect-emulator-3.4.8.exe","args":["--logtostderr","-v=2","dev","--listen=localhost:50001","--config_dir=c:\\Coding\\MyGithub\\Kara\\dataconnect","--enable_output_schema_extensions=true","--enable_output_generated_sdk=true"],"optionalArgs":["listen","config_dir","enable_output_schema_extensions","enable_output_generated_sdk"],"joinArgs":true,"shell":false,"port":9399} {"metadata":{"emulator":{"name":"dataconnect"},"message":"Starting SQL Connect Emulator with command {\"binary\":\"C:\\\\Users\\\\cosma\\\\.cache\\\\firebase\\\\emulators\\\\dataconnect-emulator-3.4.8.exe\",\"args\":[\"--logtostderr\",\"-v=2\",\"dev\",\"--listen=localhost:50001\",\"--config_dir=c:\\\\Coding\\\\MyGithub\\\\Kara\\\\dataconnect\",\"--enable_output_schema_extensions=true\",\"--enable_output_generated_sdk=true\"],\"optionalArgs\":[\"listen\",\"config_dir\",\"enable_output_schema_extensions\",\"enable_output_generated_sdk\"],\"joinArgs\":true,\"shell\":false,\"port\":9399}"}}
+[info] i  dataconnect: SQL Connect Emulator logging to dataconnect-debug.log {"metadata":{"emulator":{"name":"dataconnect"},"message":"SQL Connect Emulator logging to \u001b[1mdataconnect-debug.log\u001b[22m"}}
+[debug] [2026-05-22T17:35:02.512Z] E0522 13:35:02.510019  101072 dev.go:83] Failed to load initial config from "c:\\Coding\\MyGithub\\Kara\\dataconnect": could not find dataconnect.yaml in `c:\Coding\MyGithub\Kara\dataconnect`
+E0522 13:35:02.511051  101072 watch.go:116] watchAllDir unable to walk dir `c:\Coding\MyGithub\Kara\dataconnect`: GetFileAttributesEx c:\Coding\MyGithub\Kara\dataconnect: The system cannot find the file specified.
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0522 13:35:02.510019  101072 dev.go:83] Failed to load initial config from \"c:\\\\Coding\\\\MyGithub\\\\Kara\\\\dataconnect\": could not find dataconnect.yaml in `c:\\Coding\\MyGithub\\Kara\\dataconnect`\nE0522 13:35:02.511051  101072 watch.go:116] watchAllDir unable to walk dir `c:\\Coding\\MyGithub\\Kara\\dataconnect`: GetFileAttributesEx c:\\Coding\\MyGithub\\Kara\\dataconnect: The system cannot find the file specified.\n"}}
+[debug] [2026-05-22T17:35:02.520Z] I0522 13:35:02.516814  101072 dev.go:104] Listening on address (HTTP + gRPC): 127.0.0.1:50001
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0522 13:35:02.516814  101072 dev.go:104] Listening on address (HTTP + gRPC): 127.0.0.1:50001\n"}}
+[debug] [2026-05-22T17:35:02.571Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-05-22T17:35:02.571Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-05-22T17:35:02.597Z] [Firebase Plugin] User found:  mtlprogramming@gmail.com
+[info] [Firebase Plugin] (Core:Project) New user detected, fetching projects
+[debug] [2026-05-22T17:35:02.598Z] Checked if tokens are valid: true, expires at: 1779474901571
+[debug] [2026-05-22T17:35:02.598Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=1000
+[error] [Firebase Plugin] error:  {}
+[debug] [2026-05-22T17:35:03.013Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2026-05-22T17:35:03.014Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[debug] [2026-05-22T17:35:12.511Z] E0522 13:35:12.511954  101072 watch.go:40] Failed to load config from "c:\\Coding\\MyGithub\\Kara\\dataconnect": could not find dataconnect.yaml in `c:\Coding\MyGithub\Kara\dataconnect`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0522 13:35:12.511954  101072 watch.go:40] Failed to load config from \"c:\\\\Coding\\\\MyGithub\\\\Kara\\\\dataconnect\": could not find dataconnect.yaml in `c:\\Coding\\MyGithub\\Kara\\dataconnect`\n"}}
+[debug] [2026-05-22T17:35:22.511Z] E0522 13:35:22.512099  101072 watch.go:40] Failed to load config from "c:\\Coding\\MyGithub\\Kara\\dataconnect": could not find dataconnect.yaml in `c:\Coding\MyGithub\Kara\dataconnect`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0522 13:35:22.512099  101072 watch.go:40] Failed to load config from \"c:\\\\Coding\\\\MyGithub\\\\Kara\\\\dataconnect\": could not find dataconnect.yaml in `c:\\Coding\\MyGithub\\Kara\\dataconnect`\n"}}
+[debug] [2026-05-22T17:35:32.512Z] E0522 13:35:32.512414  101072 watch.go:40] Failed to load config from "c:\\Coding\\MyGithub\\Kara\\dataconnect": could not find dataconnect.yaml in `c:\Coding\MyGithub\Kara\dataconnect`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0522 13:35:32.512414  101072 watch.go:40] Failed to load config from \"c:\\\\Coding\\\\MyGithub\\\\Kara\\\\dataconnect\": could not find dataconnect.yaml in `c:\\Coding\\MyGithub\\Kara\\dataconnect`\n"}}
+[debug] [2026-05-22T17:35:42.511Z] E0522 13:35:42.512143  101072 watch.go:40] Failed to load config from "c:\\Coding\\MyGithub\\Kara\\dataconnect": could not find dataconnect.yaml in `c:\Coding\MyGithub\Kara\dataconnect`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0522 13:35:42.512143  101072 watch.go:40] Failed to load config from \"c:\\\\Coding\\\\MyGithub\\\\Kara\\\\dataconnect\": could not find dataconnect.yaml in `c:\\Coding\\MyGithub\\Kara\\dataconnect`\n"}}
+[debug] [2026-05-22T17:35:52.511Z] E0522 13:35:52.511905  101072 watch.go:40] Failed to load config from "c:\\Coding\\MyGithub\\Kara\\dataconnect": could not find dataconnect.yaml in `c:\Coding\MyGithub\Kara\dataconnect`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0522 13:35:52.511905  101072 watch.go:40] Failed to load config from \"c:\\\\Coding\\\\MyGithub\\\\Kara\\\\dataconnect\": could not find dataconnect.yaml in `c:\\Coding\\MyGithub\\Kara\\dataconnect`\n"}}
+[debug] [2026-05-22T17:36:02.511Z] E0522 13:36:02.512247  101072 watch.go:116] watchAllDir unable to walk dir `c:\Coding\MyGithub\Kara\dataconnect`: GetFileAttributesEx c:\Coding\MyGithub\Kara\dataconnect: The system cannot find the file specified.
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0522 13:36:02.512247  101072 watch.go:116] watchAllDir unable to walk dir `c:\\Coding\\MyGithub\\Kara\\dataconnect`: GetFileAttributesEx c:\\Coding\\MyGithub\\Kara\\dataconnect: The system cannot find the file specified.\n"}}
+[debug] [2026-05-22T17:36:02.512Z] E0522 13:36:02.512247  101072 watch.go:40] Failed to load config from "c:\\Coding\\MyGithub\\Kara\\dataconnect": could not find dataconnect.yaml in `c:\Coding\MyGithub\Kara\dataconnect`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0522 13:36:02.512247  101072 watch.go:40] Failed to load config from \"c:\\\\Coding\\\\MyGithub\\\\Kara\\\\dataconnect\": could not find dataconnect.yaml in `c:\\Coding\\MyGithub\\Kara\\dataconnect`\n"}}
+[debug] [2026-05-22T17:36:12.511Z] E0522 13:36:12.512008  101072 watch.go:40] Failed to load config from "c:\\Coding\\MyGithub\\Kara\\dataconnect": could not find dataconnect.yaml in `c:\Coding\MyGithub\Kara\dataconnect`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0522 13:36:12.512008  101072 watch.go:40] Failed to load config from \"c:\\\\Coding\\\\MyGithub\\\\Kara\\\\dataconnect\": could not find dataconnect.yaml in `c:\\Coding\\MyGithub\\Kara\\dataconnect`\n"}}
+[debug] [2026-05-22T17:36:22.511Z] E0522 13:36:22.512149  101072 watch.go:40] Failed to load config from "c:\\Coding\\MyGithub\\Kara\\dataconnect": could not find dataconnect.yaml in `c:\Coding\MyGithub\Kara\dataconnect`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0522 13:36:22.512149  101072 watch.go:40] Failed to load config from \"c:\\\\Coding\\\\MyGithub\\\\Kara\\\\dataconnect\": could not find dataconnect.yaml in `c:\\Coding\\MyGithub\\Kara\\dataconnect`\n"}}
+[debug] [2026-05-22T17:36:32.511Z] E0522 13:36:32.512188  101072 watch.go:40] Failed to load config from "c:\\Coding\\MyGithub\\Kara\\dataconnect": could not find dataconnect.yaml in `c:\Coding\MyGithub\Kara\dataconnect`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0522 13:36:32.512188  101072 watch.go:40] Failed to load config from \"c:\\\\Coding\\\\MyGithub\\\\Kara\\\\dataconnect\": could not find dataconnect.yaml in `c:\\Coding\\MyGithub\\Kara\\dataconnect`\n"}}
