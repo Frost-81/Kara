@@ -5,6 +5,7 @@ import { LanguageProvider } from "@/context/LanguageContext";
 import { ErrorProvider } from "@/context/ErrorContext";
 import { Toaster } from "sonner";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { CookieBanner } from "@/components/CookieBanner";
 
 const HomePage = lazy(() => import("@/pages/HomePage"));
 const PrivacyPage = lazy(() => import("@/pages/PrivacyPage"));
@@ -31,6 +32,7 @@ function App() {
             </Suspense>
           </BrowserRouter>
           <Toaster richColors position="top-right" />
+          <CookieBanner />
         </div>
       </LanguageProvider>
     </ErrorProvider>

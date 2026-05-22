@@ -234,6 +234,13 @@ export const translations = {
       placeholder: "Écrivez votre message...",
       error: "Désolé, une erreur s'est produite. Veuillez réessayer."
     },
+    // Cookies
+    cookies: {
+      copy: "Nous utilisons des témoins essentiels pour faire fonctionner le site et mémoriser vos préférences. En cliquant sur « Accepter », vous consentez à leur utilisation.",
+      essentialOnly: "Essentiels seulement",
+      accept: "Accepter",
+      manageCookies: "Gérer les témoins"
+    },
     // Legal pages
     legal: {
       privacy: {
@@ -560,6 +567,13 @@ export const translations = {
       welcome: "Are you a property owner? Entrust us with the management of your property today.",
       placeholder: "Write your message...",
       error: "Sorry, an error occurred. Please try again."
+    },
+    // Cookies
+    cookies: {
+      copy: "We use essential cookies to operate the site and remember your preferences. By clicking \"Accept\", you consent to their use.",
+      essentialOnly: "Essential only",
+      accept: "Accept",
+      manageCookies: "Manage cookies"
     },
     // Legal pages
     legal: {
