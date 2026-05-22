@@ -214,6 +214,8 @@ export const translations = {
     footer: {
       description: "Votre partenaire de confiance pour la gestion immobilière au Québec. Spécialisé en gestion locative au Québec, nous transformons la gestion locative en une expérience sans stress.",
       tagline: "Spécialisé en gestion locative au Québec",
+      creditPrefix: "Site Web personnalisé conçu par",
+      creditLabel: "MTL Programming",
       servicesTitle: "Services",
       servicesList: ["Mise en location", "Gestion locataires", "Encaissement loyers", "Maintenance", "Réparations"],
       contactTitle: "Contact",
@@ -237,39 +239,44 @@ export const translations = {
       privacy: {
         title: "Politique de Confidentialité",
         subtitle: "Kara Immobilier Service",
-        lastUpdate: "Dernière mise à jour : 18 mars 2026",
+        lastUpdated: "Dernière mise à jour : 19 mai 2026",
         sections: [
           {
-            title: "1. Collecte des renseignements",
-            content: "Nous collectons : nom, email, téléphone, informations liées à la location ou gestion, et informations financières si applicable."
+            heading: "Informations que nous collectons et moyens techniques",
+            paragraphs: [
+              "Nous collectons des informations personnelles que vous nous fournissez directement ou qui sont collectées automatiquement par des moyens technologiques :",
+              "Soumissions directes : Nom, adresse e-mail, numéro de téléphone, détails de l'entreprise et données de transaction financière fournies lors de l'intégration du contrat, de la soumission du formulaire de contact ou du paiement par Stripe.",
+              "Suivi automatisé : Métadonnées techniques limitées incluant les adresses de protocole Internet, les types de navigateur, les identifiants d'appareil et les enregistrements d'activité des pages via les cookies. Ces données sont collectées automatiquement pour évaluer les performances du système et optimiser l'accessibilité du site."
+            ]
           },
           {
-            title: "2. Utilisation des informations",
-            content: "Pour répondre aux demandes, gérer les biens, effectuer des vérifications et améliorer nos services."
+            heading: "Comment nous utilisons vos informations",
+            paragraphs: [
+              "Vos données sont utilisées strictement pour fournir des services de gestion immobilière professionnelle, y compris :",
+              "Traitement des paiements, gestion des abonnements et génération de factures via Stripe. Réponse aux demandes de support technique et aux demandes d'architecture de projet. Défense contre les incidents de sécurité, les spams de formulaire non autorisés et les interventions système malveillantes.",
+              "Nous ne vendons jamais, ne louons pas et ne commercialisons pas vos informations personnelles avec des tiers à des fins de marketing."
+            ]
           },
           {
-            title: "3. Protection des données",
-            content: "Nous mettons en place des mesures pour protéger vos données contre tout accès non autorisé."
+            heading: "Stockage des données, accès et transferts transfrontaliers",
+            paragraphs: [
+              "Pour maintenir une fiabilité de qualité professionnelle, vos informations sont traitées à l'aide d'une infrastructure cloud spécialisée :",
+              "Limites d'accès interne : L'accès à vos données personnelles est strictement limité au personnel autorisé de Kara Immobilier Service qui doit les informations pour effectuer le déploiement de projets ou la maintenance du système.",
+              "Transferts transfrontaliers : Vos données sont stockées sur des serveurs Google Cloud sécurisés et traitées via des voies de paiement comme Stripe. Comme ces centres de données et passerelles de paiement peuvent fonctionner mondialement, vos informations personnelles peuvent être transférées et stockées en dehors de la province du Québec."
+            ]
           },
           {
-            title: "4. Partage des informations",
-            content: "Nous ne vendons pas vos données. Partage limité aux propriétaires, services de vérification et partenaires nécessaires."
+            heading: "Cookies et gouvernance du consentement",
+            paragraphs: [
+              "Nous utilisons des cookies pour suivre les tendances du trafic et préserver l'intégrité de la session utilisateur. Notre site web utilise des configurations respectueuses de la confidentialité par défaut. Les technologies de suivi non essentielles sont désactivées jusqu'à ce que vous fournissiez un consentement explicite et volontaire via notre banneau de consentement aux cookies. Vous pouvez modifier vos préférences de suivi à tout moment en utilisant les contrôles de cookies situés dans le pied de page de notre site web."
+            ]
           },
           {
-            title: "5. Cookies",
-            content: "Utilisés pour améliorer l'expérience utilisateur."
-          },
-          {
-            title: "6. Conservation",
-            content: "Les données sont conservées selon les besoins et obligations légales."
-          },
-          {
-            title: "7. Vos droits",
-            content: "Accès, correction et suppression de vos données."
-          },
-          {
-            title: "8. Contact",
-            content: "Email : infokaraimmo@gmail.com\nTéléphone : 438-439-9590"
+            heading: "Vos droits et responsabilité",
+            paragraphs: [
+              "En vertu des lois canadiennes et québécoises sur la protection de la vie privée, vous conservez le droit d'accéder, de rectifier ou de demander la suppression de vos données personnelles. Vous pouvez également retirer votre consentement au traitement des données à tout moment.",
+              "L'individu responsable de la gouvernance des renseignements personnels et de la conformité du système chez Kara Immobilier Service est notre agent de protection des données désigné. Pour toute vérification de données, correction ou demande de confidentialité, nous contacter directement à : infokaraimmo@gmail.com."
+            ]
           }
         ],
         responsible: "Responsable des renseignements personnels",
@@ -534,6 +541,8 @@ export const translations = {
     footer: {
       description: "Your trusted partner for property management in Quebec. Specialized in rental management in Quebec, we transform rental management into a stress-free experience.",
       tagline: "Specialized in rental management in Quebec",
+      creditPrefix: "Custom website designed by",
+      creditLabel: "MTL Programming",
       servicesTitle: "Services",
       servicesList: ["Property listing", "Tenant management", "Rent collection", "Maintenance", "Repairs"],
       contactTitle: "Contact",
@@ -557,39 +566,44 @@ export const translations = {
       privacy: {
         title: "Privacy Policy",
         subtitle: "Kara Immobilier Service",
-        lastUpdate: "Last updated: March 18, 2026",
+        lastUpdated: "Last updated: May 19, 2026",
         sections: [
           {
-            title: "1. Information Collection",
-            content: "We collect: name, email, phone, information related to rental or management, and financial information if applicable."
+            heading: "Information We Collect and Technical Means",
+            paragraphs: [
+              "We collect personal information that you provide directly to us or that is gathered automatically through technological means:",
+              "Direct Submissions: Name, email address, phone number, corporate details, and financial transaction data provided during contract onboarding, contact form submissions, or Stripe checkout.",
+              "Automated Tracking: Limited technical metadata including internet protocol addresses, browser types, device identifiers, and page activity records via cookies. This data is collected automatically to evaluate system performance and optimize site accessibility."
+            ]
           },
           {
-            title: "2. Use of Information",
-            content: "To respond to requests, manage properties, perform verifications and improve our services."
+            heading: "How We Use Your Information",
+            paragraphs: [
+              "Your data is utilized strictly to deliver professional web engineering and managed services, including:",
+              "Processing payments, managing subscriptions, and generating invoices via Stripe. Responding to technical support tickets and project architecture requests. Defending against security incidents, unauthorized form spam, and malicious system interventions.",
+              "We never sell, rent, or trade your personal information with third parties for marketing purposes."
+            ]
           },
           {
-            title: "3. Data Protection",
-            content: "We implement measures to protect your data against unauthorized access."
+            heading: "Data Storage, Access, and Cross Border Transfers",
+            paragraphs: [
+              "To maintain enterprise grade reliability, your information is processed using specialized cloud infrastructure:",
+              "Internal Access Limits: Access to your personal data is strictly limited to authorized personnel within MTL Programming who require the information to perform project deployment or system maintenance.",
+              "Cross Border Transfers: Your data is stored on secure Google Cloud servers and processed through payment pathways like Stripe. Because these data centers and payment gateways may operate globally, your personal information may be transferred and stored outside the Province of Quebec."
+            ]
           },
           {
-            title: "4. Information Sharing",
-            content: "We do not sell your data. Limited sharing with property owners, verification services and necessary partners."
+            heading: "Cookies and Consent Governance",
+            paragraphs: [
+              "We employ cookies to track traffic patterns and preserve user session integrity. Our website uses privacy by default configurations. Non essential tracking technologies are deactivated until you provide explicit, voluntary consent through our cookie consent banner. You can modify your tracking preferences at any time using the cookie controls located in our website footer."
+            ]
           },
           {
-            title: "5. Cookies",
-            content: "Used to improve user experience."
-          },
-          {
-            title: "6. Retention",
-            content: "Data is retained according to needs and legal obligations."
-          },
-          {
-            title: "7. Your Rights",
-            content: "Access, correction and deletion of your data."
-          },
-          {
-            title: "8. Contact",
-            content: "Email: infokaraimmo@gmail.com\nPhone: 438-439-9590"
+            heading: "Your Rights and Accountability",
+            paragraphs: [
+              "Under Canadian and Quebec privacy regulations, you retain the right to access, rectify, or request the deletion of your personal data. You may also withdraw your consent to data processing at any time.",
+              "The individual accountable for personal information governance and system compliance at MTL Programming is our designated Privacy Officer. For any data verification, correction, or privacy inquiries, contact us directly at: info@mtlprogramming.com."
+            ]
           }
         ],
         responsible: "Personal Information Officer",

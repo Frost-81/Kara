@@ -11,13 +11,19 @@ export default function PrivacyPage() {
         <div className="bg-white p-8 md:p-12 rounded-sm shadow-lg">
           <h1 className="font-heading text-3xl md:text-4xl font-bold text-slate-900 mb-2">{privacy.title}</h1>
           <p className="text-teal-600 font-medium mb-2">{privacy.subtitle}</p>
-          <p className="text-slate-500 text-sm mb-8">{privacy.lastUpdate}</p>
+          <p className="text-slate-500 text-sm mb-8">{privacy.lastUpdated}</p>
 
           <div className="space-y-6">
             {privacy.sections.map((section, index) => (
-              <div key={`${section.title}-${index}`}>
-                <h2 className="font-semibold text-lg text-slate-900 mb-2">{section.title}</h2>
-                <p className="text-slate-600 whitespace-pre-line">{section.content}</p>
+              <div key={`${section.heading}-${index}`}>
+                <h2 className="font-semibold text-lg text-slate-900 mb-2">{section.heading}</h2>
+                <div className="space-y-3 text-slate-600">
+                  {section.paragraphs.map((paragraph, paragraphIndex) => (
+                    <p key={`${section.heading}-${paragraphIndex}`} className="whitespace-pre-line">
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
               </div>
             ))}
           </div>

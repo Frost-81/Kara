@@ -61,6 +61,16 @@ const Navbar = memo(function Navbar() {
     setIsMobileMenuOpen(false);
   }, []);
 
+  const desktopLinkClass = isScrolled
+    ? "text-slate-600 hover:text-slate-900"
+    : "text-white hover:text-white/80";
+  const mobileMenuClass = isScrolled
+    ? "absolute right-0 top-full pb-6 space-y-4 mt-1"
+    : "absolute right-0 top-full mt-2 rounded-sm bg-slate-900/25 px-4 pb-6 pt-2 shadow-xl ring-1 ring-white/20 backdrop-blur-md space-y-4 w-fit";
+  const mobileLinkClass = isScrolled
+    ? "text-slate-600 hover:text-slate-900"
+    : "text-white hover:text-white/80";
+
   return (
     <nav
       data-testid="navbar"
@@ -70,27 +80,27 @@ const Navbar = memo(function Navbar() {
           : "bg-transparent"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20 relative">
         <div className="flex items-center justify-between h-20">
           <Link to="/" data-testid="logo" className="flex items-center gap-3">
             <Building2 className="w-8 h-8 text-teal-600" />
-            <span className="font-heading text-xl font-bold text-slate-900">Kara Immobilier</span>
+            <span className={`font-heading text-xl font-bold ${isScrolled ? "text-slate-900" : "text-white"}`}>Kara Immobilier</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-6">
-            <button onClick={() => scrollToSection("services")} className="text-slate-600 hover:text-slate-900 transition-colors font-medium">
+            <button onClick={() => scrollToSection("services")} className={`${desktopLinkClass} transition-colors font-medium`}>
               {t.nav.services}
             </button>
-            <button onClick={() => scrollToSection("benefits")} className="text-slate-600 hover:text-slate-900 transition-colors font-medium">
+            <button onClick={() => scrollToSection("benefits")} className={`${desktopLinkClass} transition-colors font-medium`}>
               {t.nav.benefits}
             </button>
-            <button onClick={() => scrollToSection("about")} className="text-slate-600 hover:text-slate-900 transition-colors font-medium">
+            <button onClick={() => scrollToSection("about")} className={`${desktopLinkClass} transition-colors font-medium`}>
               {t.nav.about}
             </button>
-            <button onClick={() => scrollToSection("pricing")} className="text-slate-600 hover:text-slate-900 transition-colors font-medium">
+            <button onClick={() => scrollToSection("pricing")} className={`${desktopLinkClass} transition-colors font-medium`}>
               {t.nav.pricing}
             </button>
-            <button onClick={() => scrollToSection("contact")} className="text-slate-600 hover:text-slate-900 transition-colors font-medium">
+            <button onClick={() => scrollToSection("contact")} className={`${desktopLinkClass} transition-colors font-medium`}>
               {t.nav.contact}
             </button>
             <LanguageSwitcher />
@@ -105,18 +115,18 @@ const Navbar = memo(function Navbar() {
           <div className="md:hidden flex items-center gap-3">
             <LanguageSwitcher />
             <button onClick={() => setIsMobileMenuOpen((prev) => !prev)} className="p-2" data-testid="mobile-menu-btn">
-              <Menu className="w-6 h-6 text-slate-900" />
+              <Menu className={`w-6 h-6 ${isScrolled ? "text-slate-900" : "text-white"}`} />
             </button>
           </div>
         </div>
 
         {isMobileMenuOpen && (
-          <div className="md:hidden pb-6 space-y-4" data-testid="mobile-menu">
-            <button onClick={() => scrollToSection("services")} className="block w-full text-left py-2 text-slate-600 hover:text-slate-900">{t.nav.services}</button>
-            <button onClick={() => scrollToSection("benefits")} className="block w-full text-left py-2 text-slate-600 hover:text-slate-900">{t.nav.benefits}</button>
-            <button onClick={() => scrollToSection("about")} className="block w-full text-left py-2 text-slate-600 hover:text-slate-900">{t.nav.about}</button>
-            <button onClick={() => scrollToSection("pricing")} className="block w-full text-left py-2 text-slate-600 hover:text-slate-900">{t.nav.pricing}</button>
-            <button onClick={() => scrollToSection("contact")} className="block w-full text-left py-2 text-slate-600 hover:text-slate-900">{t.nav.contact}</button>
+          <div className={`md:hidden ${mobileMenuClass}`} data-testid="mobile-menu">
+            <button onClick={() => scrollToSection("services")} className={`block w-full text-left py-2 transition-colors ${mobileLinkClass}`}>{t.nav.services}</button>
+            <button onClick={() => scrollToSection("benefits")} className={`block w-full text-left py-2 transition-colors ${mobileLinkClass}`}>{t.nav.benefits}</button>
+            <button onClick={() => scrollToSection("about")} className={`block w-full text-left py-2 transition-colors ${mobileLinkClass}`}>{t.nav.about}</button>
+            <button onClick={() => scrollToSection("pricing")} className={`block w-full text-left py-2 transition-colors ${mobileLinkClass}`}>{t.nav.pricing}</button>
+            <button onClick={() => scrollToSection("contact")} className={`block w-full text-left py-2 transition-colors ${mobileLinkClass}`}>{t.nav.contact}</button>
           </div>
         )}
       </div>
@@ -620,7 +630,20 @@ const Footer = memo(function Footer() {
           </div>
         </div>
         <div className="border-t border-slate-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-slate-500 text-sm">{t.footer.copyright}</p>
+          <div className="flex flex-col gap-2">
+            <p className="text-slate-500 text-sm">{t.footer.copyright}</p>
+            <p className="text-slate-500 text-sm">
+              {t.footer.creditPrefix}{" "}
+              <a
+                href="https://mtlprogramming.com"
+                target="_blank"
+                rel="noreferrer"
+                className="text-teal-300 hover:text-teal-200 transition-colors"
+              >
+                {t.footer.creditLabel}
+              </a>
+            </p>
+          </div>
           <div className="flex gap-6 text-slate-500 text-sm">
             <Link to="/terms" className="hover:text-teal-400 transition-colors">{t.footer.terms}</Link>
             <Link to="/privacy" className="hover:text-teal-400 transition-colors">{t.footer.privacy}</Link>
