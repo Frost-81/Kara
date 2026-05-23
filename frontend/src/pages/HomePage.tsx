@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useGlobalError } from "@/context/ErrorContext";
+import { useCookieContext } from "@/context/CookieContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { apiClient } from "@/lib/api";
@@ -583,6 +584,7 @@ const ContactSection = memo(function ContactSection() {
 
 const Footer = memo(function Footer() {
   const { t } = useLanguage();
+  const { showBanner } = useCookieContext();
 
   return (
     <footer className="bg-slate-950 text-white py-16" data-testid="footer">
@@ -647,6 +649,9 @@ const Footer = memo(function Footer() {
           <div className="flex gap-6 text-slate-500 text-sm">
             <Link to="/terms" className="hover:text-teal-400 transition-colors">{t.footer.terms}</Link>
             <Link to="/privacy" className="hover:text-teal-400 transition-colors">{t.footer.privacy}</Link>
+            <button onClick={showBanner} className="hover:text-teal-400 transition-colors bg-transparent border-none cursor-pointer p-0">
+              {t.footer.manageCookies}
+            </button>
           </div>
         </div>
       </div>

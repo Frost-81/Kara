@@ -214,7 +214,7 @@ export const translations = {
     footer: {
       description: "Votre partenaire de confiance pour la gestion immobilière au Québec. Spécialisé en gestion locative au Québec, nous transformons la gestion locative en une expérience sans stress.",
       tagline: "Spécialisé en gestion locative au Québec",
-      creditPrefix: "Site Web personnalisé conçu par",
+      creditPrefix: "Site Web conçu par",
       creditLabel: "MTL Programming",
       servicesTitle: "Services",
       servicesList: ["Mise en location", "Gestion locataires", "Encaissement loyers", "Maintenance", "Réparations"],
@@ -224,6 +224,7 @@ export const translations = {
       legal: "Mentions légales",
       privacy: "Politique de confidentialité",
       terms: "Conditions d'utilisation",
+      manageCookies: "Gérer les témoins",
       copyright: "© 2024 Kara Immobilier Service. Tous droits réservés."
     },
     // Chatbot
@@ -548,7 +549,7 @@ export const translations = {
     footer: {
       description: "Your trusted partner for property management in Quebec. Specialized in rental management in Quebec, we transform rental management into a stress-free experience.",
       tagline: "Specialized in rental management in Quebec",
-      creditPrefix: "Custom website designed by",
+      creditPrefix: "Custom website by",
       creditLabel: "MTL Programming",
       servicesTitle: "Services",
       servicesList: ["Property listing", "Tenant management", "Rent collection", "Maintenance", "Repairs"],
@@ -558,6 +559,7 @@ export const translations = {
       legal: "Legal notice",
       privacy: "Privacy policy",
       terms: "Terms of use",
+      manageCookies: "Manage cookies",
       copyright: "© 2024 Kara Immobilier Service. All rights reserved."
     },
     // Chatbot

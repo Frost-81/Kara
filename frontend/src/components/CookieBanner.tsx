@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useCookieContext } from "@/context/CookieContext";
 import "@/components/CookieBanner.css";
 
 const COOKIE_CONSENT_KEY = "kara-cookie-consent";
@@ -7,20 +8,20 @@ const COOKIE_CONSENT_KEY = "kara-cookie-consent";
 type ConsentMode = "essential" | "all" | null;
 
 export const CookieBanner = () => {
-  const [isVisible, setIsVisible] = useState(false);
   const { t, language } = useLanguage();
+  const { isBannerVisible, showBanner, hideBanner } = useCookieContext();
 
   useEffect(() => {
     // Check if user has already made a choice
     const savedConsent = localStorage.getItem(COOKIE_CONSENT_KEY);
     if (!savedConsent) {
-      setIsVisible(true);
+      showBanner();
     }
-  }, []);
+  }, [showBanner]);
 
   const handleConsent = (mode: ConsentMode) => {
     localStorage.setItem(COOKIE_CONSENT_KEY, mode || "essential");
-    setIsVisible(false);
+    hideBanner();
     
     // Here you can add logic to load analytics or other tracking scripts
     // based on the consent mode
@@ -38,11 +39,7 @@ export const CookieBanner = () => {
     // gtag('consent', 'update', {'analytics_storage': 'granted'});
   };
 
-  const handleManageCookies = () => {
-    setIsVisible(true);
-  };
-
-  if (!isVisible) {
+  if (!isBannerVisible) {
     return null;
   }
 
@@ -84,23 +81,4 @@ export const CookieBanner = () => {
       </div>
     </aside>
   );
-};
-
-// Export function to manage cookies from other components (e.g., footer)
-export const showCookieBanner = () => {
-  const banner = document.getElementById("cookieBanner");
-  if (banner) {
-    (banner as HTMLElement).style.display = "flex";
-  }
-};
-
-// Function to check current consent mode
-export const getCookieConsent = (): ConsentMode => {
-  const consent = localStorage.getItem(COOKIE_CONSENT_KEY);
-  return (consent as ConsentMode) || null;
-};
-
-// Function to reset cookie preferences
-export const resetCookieConsent = () => {
-  localStorage.removeItem(COOKIE_CONSENT_KEY);
 };
