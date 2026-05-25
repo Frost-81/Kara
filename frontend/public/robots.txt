@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /static/
 
-Sitemap: https://kara-immobilier-service.web.app/sitemap.xml
+Sitemap: https://karaimmobilierservice.com/sitemap.xml

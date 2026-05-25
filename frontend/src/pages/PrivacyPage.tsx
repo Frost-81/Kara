@@ -1,7 +1,14 @@
 import { LegalPageLayout } from "@/components/LegalPageLayout";
 import { useLanguage } from "@/context/LanguageContext";
+import { usePageMetadata } from "@/hooks/usePageMetadata";
 
 export default function PrivacyPage() {
+  usePageMetadata({
+    title: "Politique de confidentialite | Kara Immobilier Service",
+    description: "Consultez la politique de confidentialite de Kara Immobilier Service et la gestion des donnees du site.",
+    path: "/privacy",
+  });
+
   const { t } = useLanguage();
   const privacy = t.legal.privacy;
 

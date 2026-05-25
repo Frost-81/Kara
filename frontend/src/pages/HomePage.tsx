@@ -29,10 +29,13 @@ import { useGlobalError } from "@/context/ErrorContext";
 import { useCookieContext } from "@/context/CookieContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { usePageMetadata } from "@/hooks/usePageMetadata";
 import { apiClient } from "@/lib/api";
 import { toast } from "sonner";
 
 const AIChatbot = lazy(() => import("@/components/chat/AIChatbot"));
+
+const HOME_PAGE_DESCRIPTION = "Gestion immobiliere et location a Montreal avec accompagnement proprietaire, marketing locatif et suivi terrain.";
 
 type ContactFormData = {
   name: string;
@@ -660,6 +663,12 @@ const Footer = memo(function Footer() {
 });
 
 export default function HomePage() {
+  usePageMetadata({
+    title: "Kara Immobilier Service | Gestion & Location Immobiliere",
+    description: HOME_PAGE_DESCRIPTION,
+    path: "/",
+  });
+
   const { language } = useLanguage();
 
   return (

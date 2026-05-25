@@ -1,7 +1,14 @@
 import { LegalPageLayout } from "@/components/LegalPageLayout";
 import { useLanguage } from "@/context/LanguageContext";
+import { usePageMetadata } from "@/hooks/usePageMetadata";
 
 export default function TermsPage() {
+  usePageMetadata({
+    title: "Conditions d'utilisation | Kara Immobilier Service",
+    description: "Consultez les conditions d'utilisation applicables au site Kara Immobilier Service.",
+    path: "/terms",
+  });
+
   const { t } = useLanguage();
   const terms = t.legal.terms;
 
