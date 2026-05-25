@@ -1,5 +1,5 @@
 import { memo, lazy, Suspense, useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   Award,
@@ -53,6 +53,8 @@ const Navbar = memo(function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { t } = useLanguage();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -64,6 +66,17 @@ const Navbar = memo(function Navbar() {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
     setIsMobileMenuOpen(false);
   }, []);
+
+  const handleLogoClick = useCallback(() => {
+    setIsMobileMenuOpen(false);
+
+    if (location.pathname !== "/") {
+      navigate("/");
+      return;
+    }
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [location.pathname, navigate]);
 
   const desktopLinkClass = isScrolled
     ? "text-slate-600 hover:text-slate-900"
@@ -86,10 +99,15 @@ const Navbar = memo(function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20 relative">
         <div className="flex items-center justify-between h-20">
-          <Link to="/" data-testid="logo" className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={handleLogoClick}
+            data-testid="logo"
+            className="flex items-center gap-3 bg-transparent border-none cursor-pointer p-0"
+          >
             <Building2 className="w-8 h-8 text-teal-600" />
             <span className={`font-heading text-xl font-bold ${isScrolled ? "text-slate-900" : "text-white"}`}>Kara Immobilier</span>
-          </Link>
+          </button>
 
           <div className="hidden md:flex items-center gap-6">
             <button onClick={() => scrollToSection("services")} className={`${desktopLinkClass} transition-colors font-medium`}>
