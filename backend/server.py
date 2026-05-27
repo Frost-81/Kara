@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, APIRouter, HTTPException, BackgroundTasks
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -52,8 +53,41 @@ GENAI_CLIENT = create_genai_client()
 # Email configuration
 NOTIFICATION_EMAIL = os.environ.get('NOTIFICATION_EMAIL', 'infokaraimmo@gmail.com')
 
+# Models that must stay active on Gemini Enterprise Agent Platform
+# (per the June 15 2026 access-policy email — a call per model per 90 days is required)
+_GEMINI_KEEPALIVE_MODELS = [
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-lite",
+    "gemini-3-flash-preview",
+]
+
+async def _ping_gemini_models() -> None:
+    """Fire a minimal generate_content call to each required model so the
+    kara-immobilier-service project stays active on Gemini Enterprise Agent
+    Platform.  Failures are logged but never raise — they must not block startup."""
+    if not GENAI_CLIENT:
+        logger.warning("Gemini keep-alive skipped: GENAI_CLIENT not configured")
+        return
+    for model in _GEMINI_KEEPALIVE_MODELS:
+        try:
+            GENAI_CLIENT.models.generate_content(
+                model=model,
+                contents="ping",
+                config=genai_types.GenerateContentConfig(max_output_tokens=1),
+            )
+            logger.info(f"Gemini keep-alive OK: {model}")
+        except Exception as exc:
+            logger.warning(f"Gemini keep-alive failed for {model}: {exc}")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await _ping_gemini_models()
+    yield
+
+
 # Create the main app without a prefix
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
