@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /static/
 
 Sitemap: https://karaimmobilierservice.com/sitemap.xml
